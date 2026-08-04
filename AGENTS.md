@@ -2,7 +2,7 @@
 
 ## Commands
 
-- **Sync deps:** `uv sync` (installs root package + `shelfmark/` submodule workspace member)
+- **Sync deps:** `uv sync` (installs root package + `src/shelfmark/` submodule workspace member)
 - **Test:** `uv run pytest -v`
 - **Lint:** `ruff check`
 
@@ -10,7 +10,7 @@
 
 - Python package: `src/shelfmark_news/` — FastAPI app emulating Newznab and SABnzbd APIs for Readarr integration
 - API routers: `src/shelfmark_news/api/newznab.py` (search/indexer) and `api/sabnzbd.py` (download client)
-- `shelfmark/` is a **git submodule** (uv workspace member) providing the actual book search/download engine
+- `src/shelfmark/` is a **git submodule** (uv workspace member) providing the actual book search/download engine
 - Config uses environment variables directly (no config layer); see `.env.example` and `.envrc` for the expected names (largely shelfmark's native env var names like `INGEST_DIR`, `TMP_DIR`, `SERVER_API_KEY`)
 - `.envrc` provides direnv defaults for local development (creates `data/downloads`, `data/tmp`, etc.)
 - `tests/` is the only pytest `testpaths`; uses `TestClient` from FastAPI, `asyncio_mode = "auto"`
@@ -20,7 +20,7 @@
 - After cloning, run `git submodule update --init --recursive` before `uv sync`
 - Running the server: `uv run shelfmark-news` or `uv run python -m shelfmark_news.main`
 - Tests set environment variables before importing the app
-- `shelfmark/` is a full standalone Flask project with its own pyproject.toml; its source is `shelfmark/shelfmark/`, not the repo root. It should not be edited.
+- `src/shelfmark/` is a full standalone Flask project with its own pyproject.toml; its source is `src/shelfmark/shelfmark/`, not the repo root. It should not be edited.
 - No CI config is present in this repo
 
 ## Accuracy, recency, and sourcing (REQUIRED)
@@ -34,7 +34,7 @@
 - After making changes, run the project’s standard checks when feasible (format/lint, unit tests, build/typecheck).
 - Never remove comments unless there are no longer valid
 - NEVER utilize git stash or other git commands that would remove local changes
-- Do NOT suggest or make changes to any files in the submodule shelfmark/ project.
+- Do NOT suggest or make changes to any files in the submodule src/shelfmark/ project.
 
 ## Baseline workflow
 
