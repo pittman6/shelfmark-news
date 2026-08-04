@@ -15,7 +15,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 # shelfmark submodule has [tool.uv] package=false, so inject its
 # source directory onto sys.path so the shelfmark package is importable.
-_shelfmark_src = Path(__file__).parent.parent.parent / "shelfmark"
+_shelfmark_src = Path(__file__).parent.parent / "shelfmark"
 if str(_shelfmark_src) not in sys.path:
     sys.path.insert(0, str(_shelfmark_src))
 

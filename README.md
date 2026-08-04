@@ -14,15 +14,16 @@ A Newznab/SABnzbd API wrapper around [shelfmark](https://github.com/calibrain/sh
 
 ```
 shelfmark-news/
-├── src/shelfmark_news/
-│   ├── __init__.py           # Package init
-│   ├── config.py             # Environment-based configuration system
-│   ├── main.py               # FastAPI application entry point
-│   └── api/
-│       ├── __init__.py
-│       ├── newznab.py        # Newznab API for searching
-│       └── sabnzbd.py        # SABnzbd API for downloading
-├── shelfmark/                # Submodule (book search/download library)
+├── src/
+│   ├── shelfmark_news/         # Wrapper package
+│   │   ├── __init__.py           # Package init
+│   │   ├── config.py             # Environment-based configuration system
+│   │   ├── main.py               # FastAPI application entry point
+│   │   └── api/
+│   │       ├── __init__.py
+│   │       ├── newznab.py        # Newznab API for searching
+│   │       └── sabnzbd.py        # SABnzbd API for downloading
+│   └── shelfmark/               # Submodule (book search/download library)
 ├── pyproject.toml            # Project dependencies
 ├── Dockerfile                # Docker image
 ├── docker-compose.yml        # Docker Compose setup
