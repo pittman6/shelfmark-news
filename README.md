@@ -1,71 +1,91 @@
 # Shelfmark News
 
-A Newznab/SABnzbd API wrapper around [shelfmark](https://github.com/calibrain/shelfmark) for book searching and downloading. This allows applications like **Readarr** to search and download books from various sources including Anna's Archive, Libgen, Z-Library, and IRC channels.
+A Newznab/SABnzbd API wrapper around [shelfmark](https://github.com/calibrain/shelfmark) for book searching and downloading from "direct download" sources. This allows applications like **Chaptarr** to search and download books from various sources that aren't in the standard usenet or torrenting options.
+
+**Why?**: Shelfmark already has a battle-tested workflow for downloading this, but has [closed](https://github.com/calibrain/shelfmark/issues/397) requests for adding this feature in. 
+
+DISCLOSURE: The base of this project was LLM-generated. I've done my best to review and maintain the code to ensure it doesn't become complete slop. I didn't/don't have the time to devote to writing this 100% from scratch!
 
 ## Features
 
-- **Newznab API** - Compatible with Readarr and other \*arr applications for book searching
-- **SABnzbd API** - Download management compatible with Readarr's download client integration
-- **Multiple Sources** - Anna's Archive, Libgen, Z-Library, and IRC
+- **Newznab API** - Compatible with Chaptarr and other \*arr applications for book searching
+- **SABnzbd API** - Download management compatible with Chaptarr's download client integration
 - **Environment Configuration** - Fully configurable via environment variables
 - **Docker Ready** - Includes Dockerfile and docker-compose.yml
 
-## Project Structure
+## Setup
 
-```
-shelfmark-news/
-├── src/
-│   ├── shelfmark_news/         # Wrapper package
-│   │   ├── __init__.py           # Package init
-│   │   ├── config.py             # Environment-based configuration system
-│   │   ├── main.py               # FastAPI application entry point
-│   │   └── api/
-│   │       ├── __init__.py
-│   │       ├── newznab.py        # Newznab API for searching
-│   │       └── sabnzbd.py        # SABnzbd API for downloading
-│   └── shelfmark/               # Submodule (book search/download library)
-├── pyproject.toml            # Project dependencies
-├── Dockerfile                # Docker image
-├── docker-compose.yml        # Docker Compose setup
-└── .gitignore
-```
+Setup is fairly straightforward and done entirely through docker environment variables.
 
-## Quick Start
+### Run using Docker
 
-### Using Docker (Recommended)
-
-1. Clone the repository with submodules:
+1. Download the docker compose file:
    ```bash
-   git clone --recursive https://github.com/calibrain/shelfmark-news.git
-   cd shelfmark-news
+   wget https://raw.githubusercontent.com/pittman6/shelfmark-news/refs/heads/main/docker-compose.yml.example -O docker-compose.yml
    ```
+
+2. Edit environment variables in docker-compose.yml as needed (See [Configuration](#configuration)).
 
 2. Start the container:
    ```bash
    docker-compose up -d
    ```
 
-### Direct Installation
+### Adding as Download Client in Chaptarr
 
-1. Clone the repository with submodules:
-   ```bash
-   git clone --recursive https://github.com/calibrain/shelfmark-news.git
-   cd shelfmark-news
-   ```
+1. Go to **Settings → Download Clients → Add**
+2. Select **SABnzbd**
+3. Configure:
+   - **Name**: Shelfmark
+   - **Host**: `localhost`
+   - **Port**: `8080`
+   - **API Key**: Your configured `SERVER_API_KEY`
+   - **Url Base**: `sabnzbd` (enable advanced settings at the bottom to see this)
 
-2. Install the package:
-   ```bash
-   pip install -e .
-   ```
+### Adding as Indexer in Chaptarr
 
-3. Set environment variables and run:
-   ```bash
-   export SERVER_API_KEY=your-api-key
-   export INGEST_DIR=/path/to/downloads
-   shelfmark-news
-   ```
+1. Go to **Settings → Indexers → Add**
+2. Select **Newznab**
+3. Configure:
+   - **Name**: Shelfmark
+   - **URL**: `http://localhost:8080`
+   - **API Key**: Your configured `SERVER_API_KEY`
+   - **Categories**: `7020` (Ebooks)
+   - **Download Client**: Shelfmark (enable advanced settings at the bottom to see this)
 
-## API Endpoints
+## Configuration
+
+All config is done through enviroment variables.
+
+### Wrapper Environment Variables
+
+These are the only env vars this wrapper defines:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `SERVER_HOST` | `0.0.0.0` | Server bind address |
+| `SERVER_PORT` | `8080` | Server port |
+| `SERVER_API_KEY` | *(empty)* | API key for authentication |
+| `SERVER_DEBUG` | `false` | Enable debug mode |
+
+### Shelfmark Environment Variables
+
+All other configuration — download directories, source settings, IRC, mirrors, rate limits — is handled by shelfmark.
+
+At minimum, set these shelfmark variables for the wrapper to work:
+
+| Variable | Description |
+|----------|-------------|
+| `INGEST_DIR` | Completed downloads directory (default: `/books`) |
+| `LIBGEN_MIRROR_URLS` | Libgen URL |
+| `ZLIB_MIRROR_URLS` | Zlib URL |
+| `AA_MIRROR_URLS` | AA URL(s) |
+| `WELIB_MIRROR_URLS` | Welib URL |
+
+
+For the full list of shelfmark environment variables, see the [shelfmark environment variables docs](https://github.com/calibrain/shelfmark/blob/main/docs/environment-variables.md).
+
+## Supported API Endpoints
 
 ### Newznab API (`/api`)
 
@@ -107,80 +127,28 @@ shelfmark-news/
 | `/health` | Health check |
 | `/api/v1/download/{id}` | Direct download by ID |
 
-## Configuration
-
-### Wrapper Environment Variables
-
-These are the only env vars this wrapper defines:
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `SERVER_HOST` | `0.0.0.0` | Server bind address |
-| `SERVER_PORT` | `8080` | Server port |
-| `SERVER_API_KEY` | *(empty)* | API key for authentication |
-| `SERVER_DEBUG` | `false` | Enable debug mode |
-
-### Shelfmark Environment Variables
-
-All other configuration — download directories, source settings, IRC, mirrors, rate limits — is handled by shelfmark. The wrapper imports `INGEST_DIR` and `TMP_DIR` from shelfmark's config and sets a default `CONFIG_DIR` if unset.
-
-At minimum, set these shelfmark variables for the wrapper to work:
-
-| Variable | Description |
-|----------|-------------|
-| `INGEST_DIR` | Completed downloads directory (default: `/books`) |
-| `LIBGEN_MIRROR_URLS` | Libgen URL |
-| `ZLIB_MIRROR_URLS` | Zlib URL |
-| `AA_MIRROR_URLS` | AA URL(s) |
-| `WELIB_MIRROR_URLS` | Welib URL |
-
-
-For the full list of shelfmark environment variables, see the [shelfmark environment variables docs](https://github.com/calibrain/shelfmark/blob/main/docs/environment-variables.md).
-
-## Readarr Integration
-
-### Adding as Indexer
-
-1. Go to **Settings → Indexers → Add**
-2. Select **Newznab**
-3. Configure:
-   - **Name**: Shelfmark
-   - **URL**: `http://localhost:8080`
-   - **API Key**: Your configured `SERVER_API_KEY`
-   - **Categories**: `7020` (Ebooks)
-
-### Adding as Download Client
-
-1. Go to **Settings → Download Clients → Add**
-2. Select **SABnzbd**
-3. Configure:
-   - **Name**: Shelfmark
-   - **Host**: `localhost`
-   - **Port**: `8080`
-   - **API Key**: Your configured `SERVER_API_KEY`
-   - **Category**: `books`
-
-## Sources
-
-### Supported Sources
-
-| Source | Type | Description |
-|--------|------|-------------|
-| **Anna's Archive** | Direct Download | Primary search source, cascades through multiple mirrors |
-| **Libgen** | Direct Download | Library Genesis mirrors |
-| **Z-Library** | Direct Download | Z-Library mirrors |
-| **IRC** | DCC | IRC channel book sharing (requires separate IRC setup) |
-
-### Source Priority
-
-Downloads cascade through sources in priority order:
-1. Anna's Archive Fast (requires donator key)
-2. Libgen
-3. Anna's Archive Slow (no waitlist)
-4. Anna's Archive Slow (with waitlist)
-5. Z-Library
 
 ## Development
+
+### Install
+
+1. Clone the repository with submodules:
+   ```bash
+   git clone --recursive https://github.com/calibrain/shelfmark-news.git
+   cd shelfmark-news
+   ```
+
+2. Install the package:
+   ```bash
+   pip install -e .
+   ```
+
+3. Set environment variables and run:
+   ```bash
+   export SERVER_API_KEY=your-api-key
+   export INGEST_DIR=/path/to/downloads
+   shelfmark-news
+   ```
 
 ### Running Tests
 
@@ -196,14 +164,6 @@ pytest
 - **Pydantic** - Settings management
 - **shelfmark** - Book search/download library (submodule)
 
-## Docker Volumes
-
-| Path | Description |
-|------|-------------|
-| `$INGEST_DIR` | Completed downloads |
-| `$TMP_DIR` | Temporary download staging |
-| `$CONFIG_DIR` | Configuration files |
-
 ## License
 
 MIT License - See LICENSE file for details.
@@ -211,6 +171,5 @@ MIT License - See LICENSE file for details.
 ## Acknowledgments
 
 - [shelfmark](https://github.com/calibrain/shelfmark) - The underlying book search and download library
-- [Readarr](https://readarr.com/) - Book collection manager
 - [Newznab](https://newznab.readthedocs.io/) - API specification
 - [SABnzbd](https://sabnzbd.org/) - API specification
