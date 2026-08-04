@@ -4,11 +4,12 @@ A Newznab/SABnzbd API wrapper around [shelfmark](https://github.com/calibrain/sh
 
 **Why?**: Shelfmark already has a battle-tested workflow for downloading this, but has [closed](https://github.com/calibrain/shelfmark/issues/397) requests for adding this feature in. 
 
+DISCLOSURE: The base of this project was LLM-generated. I've done my best to review and maintain the code to ensure it doesn't become complete slop. I didn't/don't have the time to devote to writing this 100% from scratch!
+
 ## Features
 
-- **Newznab API** - Compatible with Readarr and other \*arr applications for book searching
-- **SABnzbd API** - Download management compatible with Readarr's download client integration
-- **Multiple Sources** - Anna's Archive, Libgen, Z-Library, and IRC
+- **Newznab API** - Compatible with Chaptarr and other \*arr applications for book searching
+- **SABnzbd API** - Download management compatible with Chaptarr's download client integration
 - **Environment Configuration** - Fully configurable via environment variables
 - **Docker Ready** - Includes Dockerfile and docker-compose.yml
 
