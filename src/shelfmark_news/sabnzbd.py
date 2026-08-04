@@ -16,9 +16,9 @@ from dataclasses import dataclass, field
 from fastapi import APIRouter, HTTPException, Query, BackgroundTasks, Request
 from fastapi.responses import JSONResponse, Response
 
-from shelfmark_wrapper.config import SERVER_API_KEY, INGEST_DIR, TMP_DIR
+from shelfmark_news.config import SERVER_API_KEY, INGEST_DIR, TMP_DIR
 
-logger = logging.getLogger("shelfmark_wrapper.sabnzbd")
+logger = logging.getLogger("shelfmark_news.sabnzbd")
 
 
 router = APIRouter(tags=["sabnzbd"])
@@ -389,7 +389,7 @@ async def _execute_download(nzo_id: str, source_id: str) -> None:
             fetch_download_count=False,
         )
         item.title = book_info.title
-        from shelfmark_wrapper.newznab import _parse_size_to_bytes
+        from shelfmark_news.newznab import _parse_size_to_bytes
 
         item.size = _parse_size_to_bytes(book_info.size)
 
@@ -607,7 +607,7 @@ async def download_file(
 <!DOCTYPE nzb PUBLIC "-//newzBin//DTD NZB 1.1//EN" "http://www.newzbin.com/DTD/nzb/nzb-1.1.dtd">
 <nzb xmlns="http://www.newzbin.com/DTD/2003/nzb">
   <head>
-    <meta type="source">shelfmark-wrapper</meta>
+    <meta type="source">shelfmark-news</meta>
     <meta type="id">{source_id}</meta>
   </head>
   <file poster="shelfmark@wrapper" date="0" subject="{source_id}">

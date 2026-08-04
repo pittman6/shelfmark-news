@@ -8,8 +8,8 @@
 
 ## Architecture
 
-- Python package: `src/shelfmark_wrapper/` — FastAPI app emulating Newznab and SABnzbd APIs for Readarr integration
-- API routers: `src/shelfmark_wrapper/api/newznab.py` (search/indexer) and `api/sabnzbd.py` (download client)
+- Python package: `src/shelfmark_news/` — FastAPI app emulating Newznab and SABnzbd APIs for Readarr integration
+- API routers: `src/shelfmark_news/api/newznab.py` (search/indexer) and `api/sabnzbd.py` (download client)
 - `shelfmark/` is a **git submodule** (uv workspace member) providing the actual book search/download engine
 - Config uses environment variables directly (no config layer); see `.env.example` and `.envrc` for the expected names (largely shelfmark's native env var names like `INGEST_DIR`, `TMP_DIR`, `SERVER_API_KEY`)
 - `.envrc` provides direnv defaults for local development (creates `data/downloads`, `data/tmp`, etc.)
@@ -18,7 +18,7 @@
 ## Quirks
 
 - After cloning, run `git submodule update --init --recursive` before `uv sync`
-- Running the server: `uv run shelfmark-wrapper` or `uv run python -m shelfmark_wrapper.main`
+- Running the server: `uv run shelfmark-news` or `uv run python -m shelfmark_news.main`
 - Tests set environment variables before importing the app
 - `shelfmark/` is a full standalone Flask project with its own pyproject.toml; its source is `shelfmark/shelfmark/`, not the repo root. It should not be edited.
 - No CI config is present in this repo

@@ -1,4 +1,4 @@
-# Shelfmark Wrapper
+# Shelfmark News
 
 A Newznab/SABnzbd API wrapper around [shelfmark](https://github.com/calibrain/shelfmark) for book searching and downloading. This allows applications like **Readarr** to search and download books from various sources including Anna's Archive, Libgen, Z-Library, and IRC channels.
 
@@ -13,8 +13,8 @@ A Newznab/SABnzbd API wrapper around [shelfmark](https://github.com/calibrain/sh
 ## Project Structure
 
 ```
-shelfmark-wrapper/
-├── src/shelfmark_wrapper/
+shelfmark-news/
+├── src/shelfmark_news/
 │   ├── __init__.py           # Package init
 │   ├── config.py             # Environment-based configuration system
 │   ├── main.py               # FastAPI application entry point
@@ -35,8 +35,8 @@ shelfmark-wrapper/
 
 1. Clone the repository with submodules:
    ```bash
-   git clone --recursive https://github.com/calibrain/shelfmark-wrapper.git
-   cd shelfmark-wrapper
+   git clone --recursive https://github.com/calibrain/shelfmark-news.git
+   cd shelfmark-news
    ```
 
 2. Start the container:
@@ -48,8 +48,8 @@ shelfmark-wrapper/
 
 1. Clone the repository with submodules:
    ```bash
-   git clone --recursive https://github.com/calibrain/shelfmark-wrapper.git
-   cd shelfmark-wrapper
+   git clone --recursive https://github.com/calibrain/shelfmark-news.git
+   cd shelfmark-news
    ```
 
 2. Install the package:
@@ -61,7 +61,7 @@ shelfmark-wrapper/
    ```bash
    export SERVER_API_KEY=your-api-key
    export INGEST_DIR=/path/to/downloads
-   shelfmark-wrapper
+   shelfmark-news
    ```
 
 ## API Endpoints

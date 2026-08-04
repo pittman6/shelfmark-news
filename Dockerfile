@@ -30,7 +30,7 @@ WORKDIR /app
 COPY pyproject.toml uv.lock README.md ./
 COPY shelfmark/pyproject.toml shelfmark/
 # stub package init so hatchling can discover the package for editable install
-RUN mkdir -p src/shelfmark_wrapper && touch src/shelfmark_wrapper/__init__.py
+RUN mkdir -p src/shelfmark_news && touch src/shelfmark_news/__init__.py
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-default-groups
@@ -60,4 +60,4 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')" || exit 1
 
-CMD ["python", "-m", "shelfmark_wrapper.main"]
+CMD ["python", "-m", "shelfmark_news.main"]

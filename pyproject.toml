@@ -1,5 +1,5 @@
 [project]
-name = "shelfmark-wrapper"
+name = "shelfmark-news"
 version = "0.1.0"
 description = "A Newznab/SABnzbd API wrapper around shelfmark for book searching and downloading"
 readme = "README.md"
@@ -24,7 +24,7 @@ search-path = ["shelfmark"]
 project-excludes = ["shelfmark/**"]
 
 [project.scripts]
-shelfmark-wrapper = "shelfmark_wrapper.main:main"
+shelfmark-news = "shelfmark_news.main:main"
 
 [build-system]
 requires = ["hatchling"]
@@ -39,7 +39,7 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/shelfmark_wrapper"]
+packages = ["src/shelfmark_news"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

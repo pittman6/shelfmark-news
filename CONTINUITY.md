@@ -1,8 +1,8 @@
 # CONTINUITY.md
 
 ## Snapshot
-- **Goal:** Pre-release secrets audit + hardening. [2026-08-03]
-- **Now:** Audit complete — no real secrets in tracked files. CORS hardened (dropped `allow_credentials=True`). `shelfmark/` gitlink re-registered at upstream HEAD `cdd156e` (old gitdir was lost, checkout was an untracked plain tree at risk of being swept in by `git add -A`). 49/49 tests pass, ruff clean.
+- **Goal:** Project rename shelfmark-wrapper → shelfmark-news. [2026-08-03]
+- **Now:** Full rename done. Package `shelfmark_wrapper` → `shelfmark_news` (dir `src/shelfmark_wrapper/` → `src/shelfmark_news/`), pyproject name/script/hatch packages, Dockerfile/compose service+container name, justfile, README/AGENTS, `uv.lock` regenerated, `.venv` reinstalled. 49/49 tests pass, ruff clean, `uv run shelfmark-news` works. Note: `src/shelfmark_news/api/` is EMPTY (AGENTS references api/newznab.py + sabnzbd.py here but real code lives at package root).
 - **Next:** Nothing pending.
 
 ## Invariants
@@ -18,6 +18,7 @@
 - **D005 ACTIVE (2026-06-29):** Shelfmark dep uses editable path (`{ path = "shelfmark/", editable = true }`) instead of workspace member. `shelfmark/shelfmark/` injected onto `sys.path` at top of `main.py` because the submodule lacks `[build-system]` so editable install produces an empty package. Root `requires-python` bumped to `>=3.14` to match shelfmark's requirement. [CODE]
 
 ## Done (recent)
+- **2026-08-03:** Full rename `shelfmark-wrapper`→`shelfmark-news` / `shelfmark_wrapper`→`shelfmark_news`: package dir, pyproject (name/script/packages), source imports+loggers+meta tag, tests, Dockerfile, compose (+example) service/container name, justfile, README (incl. clone URL paths), AGENTS. `uv.lock` regenerated, `.venv` reinstalled. 49/49 tests pass, ruff clean, console script `shelfmark-news` works. [TOOL]
 - **2026-08-03:** Pre-release audit: no secrets in tracked files (all values placeholder/env-var). Removed `allow_credentials=True` from CORS (main.py). Re-registered `shelfmark/` gitlink at `cdd156e` (upstream HEAD) after `git submodule update` was impossible (gitdir missing) — fresh clone replaces old checkout, 49/49 tests pass. [TOOL]
 - **2026-06-29:** Fixed shelfmark import — editable path dep + sys.path injection + requires-python bump. 19/19 tests pass, ruff clean. [CODE]
 - **2026-06-28:** Removed config.py and pydantic-settings. Wrapper reads env vars directly (`os.environ.get`). Shelfmark reads its own env vars natively. [CODE]

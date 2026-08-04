@@ -14,7 +14,7 @@ from xml.etree import ElementTree as ET
 from fastapi import APIRouter, Query, Request
 from fastapi.responses import Response
 
-from shelfmark_wrapper.config import SERVER_API_KEY
+from shelfmark_news.config import SERVER_API_KEY
 
 
 router = APIRouter(tags=["newznab"])
@@ -133,7 +133,7 @@ def _handle_caps(request: Request) -> Response:
         root,
         "server",
         version="1.0",
-        title="Shelfmark Wrapper",
+        title="Shelfmark News",
         strapline="Book search via Newznab API",
         email="",
     )
@@ -259,7 +259,7 @@ def _build_channel(
         rel="self",
         type="application/rss+xml",
     )
-    ET.SubElement(channel, "title").text = "Shelfmark Wrapper"
+    ET.SubElement(channel, "title").text = "Shelfmark News"
     ET.SubElement(channel, "link").text = base_url
     ET.SubElement(channel, "description").text = "Book Search Results"
     ET.SubElement(channel, "language").text = "en-us"
@@ -268,7 +268,7 @@ def _build_channel(
 
     image = ET.SubElement(channel, "image")
     ET.SubElement(image, "url").text = f"{base_url}/favicon.ico"
-    ET.SubElement(image, "title").text = "Shelfmark Wrapper"
+    ET.SubElement(image, "title").text = "Shelfmark News"
     ET.SubElement(image, "link").text = base_url
     ET.SubElement(image, "description").text = "Shelfmark"
 
