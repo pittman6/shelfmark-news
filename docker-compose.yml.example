@@ -1,7 +1,7 @@
 services:
-  shelfmark-wrapper:
+  shelfmark-news:
     build: .
-    container_name: shelfmark-wrapper
+    container_name: shelfmark-news
     ports:
       - "8080:8080"
     volumes:

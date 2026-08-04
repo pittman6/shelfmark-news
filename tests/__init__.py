@@ -1,1 +1,1 @@
-# Tests for shelfmark-wrapper
+# Tests for shelfmark-news

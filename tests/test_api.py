@@ -22,7 +22,7 @@ def client():
     Path("/tmp/shelfmark-test/tmp").mkdir(parents=True, exist_ok=True)
     os.environ["SERVER_API_KEY"] = "test-api-key"
 
-    from shelfmark_wrapper.main import app
+    from shelfmark_news.main import app
 
     return TestClient(app)
 
@@ -152,10 +152,10 @@ class TestSABnzbdAPI:
     @pytest.fixture(autouse=True)
     def _clear_queue(self):
         """Clear the in-memory download queue before each test."""
-        from shelfmark_wrapper.sabnzbd import _download_queue
+        from shelfmark_news.sabnzbd import _download_queue
 
         _download_queue.clear()
-        with patch("shelfmark_wrapper.sabnzbd._execute_download"):
+        with patch("shelfmark_news.sabnzbd._execute_download"):
             yield
         _download_queue.clear()
 
@@ -193,7 +193,7 @@ class TestSABnzbdAPI:
 
     def test_queued_item_appears_in_queue(self, client):
         """A QUEUED item appears in the queue endpoint with correct fields."""
-        from shelfmark_wrapper.sabnzbd import (
+        from shelfmark_news.sabnzbd import (
             _download_queue,
             DownloadItem,
             DownloadStatus,
@@ -221,7 +221,7 @@ class TestSABnzbdAPI:
 
     def test_downloading_item_appears_in_queue_with_speed_eta(self, client):
         """A DOWNLOADING item in queue reports speed, ETA and progress."""
-        from shelfmark_wrapper.sabnzbd import (
+        from shelfmark_news.sabnzbd import (
             _download_queue,
             DownloadItem,
             DownloadStatus,
@@ -257,7 +257,7 @@ class TestSABnzbdAPI:
 
     def test_queue_reports_idle_when_no_downloading_items(self, client):
         """Queue status is 'Idle' when all items are QUEUED (none DOWNLOADING)."""
-        from shelfmark_wrapper.sabnzbd import (
+        from shelfmark_news.sabnzbd import (
             _download_queue,
             DownloadItem,
             DownloadStatus,
@@ -280,7 +280,7 @@ class TestSABnzbdAPI:
 
     def test_queue_reports_downloading_when_any_item_is_downloading(self, client):
         """Queue status is 'Downloading' when at least one item is DOWNLOADING."""
-        from shelfmark_wrapper.sabnzbd import (
+        from shelfmark_news.sabnzbd import (
             _download_queue,
             DownloadItem,
             DownloadStatus,
@@ -309,7 +309,7 @@ class TestSABnzbdAPI:
 
     def test_completed_item_appears_in_history_not_queue(self, client):
         """A COMPLETED item appears in history, not in the queue."""
-        from shelfmark_wrapper.sabnzbd import (
+        from shelfmark_news.sabnzbd import (
             _download_queue,
             DownloadItem,
             DownloadStatus,
@@ -343,7 +343,7 @@ class TestSABnzbdAPI:
 
     def test_failed_item_appears_in_history_not_queue(self, client):
         """A FAILED item appears in history with its error message."""
-        from shelfmark_wrapper.sabnzbd import (
+        from shelfmark_news.sabnzbd import (
             _download_queue,
             DownloadItem,
             DownloadStatus,
@@ -372,7 +372,7 @@ class TestSABnzbdAPI:
 
     def test_multiple_items_mixed_states(self, client):
         """Queue and history correctly partition items by status."""
-        from shelfmark_wrapper.sabnzbd import (
+        from shelfmark_news.sabnzbd import (
             _download_queue,
             DownloadItem,
             DownloadStatus,
@@ -443,7 +443,7 @@ class TestSABnzbdAPI:
 
     def test_addurl_creates_queue_item(self, client):
         """mode=addurl creates a DownloadItem visible in the queue."""
-        from shelfmark_wrapper.sabnzbd import _download_queue
+        from shelfmark_news.sabnzbd import _download_queue
 
         response = client.get(
             "/sabnzbd/api?mode=addurl&apikey=test-api-key&name=some_source_id"
@@ -458,7 +458,7 @@ class TestSABnzbdAPI:
 
     def test_addurl_extracts_source_id_from_url(self, client):
         """mode=addurl extracts source_id from /download/ path in URL."""
-        from shelfmark_wrapper.sabnzbd import _download_queue
+        from shelfmark_news.sabnzbd import _download_queue
 
         response = client.get(
             "/sabnzbd/api?mode=addurl&apikey=test-api-key"
@@ -478,7 +478,7 @@ class TestSABnzbdAPI:
 
     def test_addfile_creates_queue_item(self, client):
         """mode=addfile with valid NZB creates a queue item."""
-        from shelfmark_wrapper.sabnzbd import _download_queue
+        from shelfmark_news.sabnzbd import _download_queue
 
         nzb_content = (
             '<?xml version="1.0"?>'
@@ -518,7 +518,7 @@ class TestSABnzbdAPI:
 
     def test_delete_removes_items(self, client):
         """mode=delete removes items from the queue."""
-        from shelfmark_wrapper.sabnzbd import (
+        from shelfmark_news.sabnzbd import (
             _download_queue,
             DownloadItem,
             DownloadStatus,
@@ -554,7 +554,7 @@ class TestSABnzbdAPI:
 
     def test_delete_value_fallback(self, client):
         """mode=delete uses value param when nzo_ids is absent."""
-        from shelfmark_wrapper.sabnzbd import _download_queue, DownloadItem, DownloadStatus
+        from shelfmark_news.sabnzbd import _download_queue, DownloadItem, DownloadStatus
 
         _download_queue["nzo_x"] = DownloadItem(
             nzo_id="nzo_x", source_id="x", source="direct_download",
@@ -569,7 +569,7 @@ class TestSABnzbdAPI:
 
     def test_pause_pauses_downloading(self, client):
         """mode=pause changes DOWNLOADING to PAUSED."""
-        from shelfmark_wrapper.sabnzbd import _download_queue, DownloadItem, DownloadStatus
+        from shelfmark_news.sabnzbd import _download_queue, DownloadItem, DownloadStatus
 
         _download_queue["nzo_a"] = DownloadItem(
             nzo_id="nzo_a", source_id="a", source="direct_download",
@@ -584,7 +584,7 @@ class TestSABnzbdAPI:
 
     def test_pause_ignores_wrong_status(self, client):
         """mode=pause does not pause QUEUED items."""
-        from shelfmark_wrapper.sabnzbd import _download_queue, DownloadItem, DownloadStatus
+        from shelfmark_news.sabnzbd import _download_queue, DownloadItem, DownloadStatus
 
         _download_queue["nzo_a"] = DownloadItem(
             nzo_id="nzo_a", source_id="a", source="direct_download",
@@ -606,7 +606,7 @@ class TestSABnzbdAPI:
 
     def test_resume_resumes_paused(self, client):
         """mode=resume changes PAUSED to DOWNLOADING."""
-        from shelfmark_wrapper.sabnzbd import _download_queue, DownloadItem, DownloadStatus
+        from shelfmark_news.sabnzbd import _download_queue, DownloadItem, DownloadStatus
 
         _download_queue["nzo_a"] = DownloadItem(
             nzo_id="nzo_a", source_id="a", source="direct_download",
@@ -621,7 +621,7 @@ class TestSABnzbdAPI:
 
     def test_resume_ignores_wrong_status(self, client):
         """mode=resume does not resume DOWNLOADING items."""
-        from shelfmark_wrapper.sabnzbd import _download_queue, DownloadItem, DownloadStatus
+        from shelfmark_news.sabnzbd import _download_queue, DownloadItem, DownloadStatus
 
         _download_queue["nzo_a"] = DownloadItem(
             nzo_id="nzo_a", source_id="a", source="direct_download",
@@ -643,7 +643,7 @@ class TestSABnzbdAPI:
 
     def test_retry_resets_failed_to_queued(self, client):
         """mode=retry resets FAILED to QUEUED, clears progress and error."""
-        from shelfmark_wrapper.sabnzbd import _download_queue, DownloadItem, DownloadStatus
+        from shelfmark_news.sabnzbd import _download_queue, DownloadItem, DownloadStatus
 
         _download_queue["nzo_a"] = DownloadItem(
             nzo_id="nzo_a", source_id="a", source="direct_download",
@@ -662,7 +662,7 @@ class TestSABnzbdAPI:
 
     def test_retry_ignores_completed(self, client):
         """mode=retry does not reset COMPLETED items."""
-        from shelfmark_wrapper.sabnzbd import _download_queue, DownloadItem, DownloadStatus
+        from shelfmark_news.sabnzbd import _download_queue, DownloadItem, DownloadStatus
 
         _download_queue["nzo_a"] = DownloadItem(
             nzo_id="nzo_a", source_id="a", source="direct_download",
@@ -764,17 +764,17 @@ class TestReadarrWorkflow:
     @pytest.fixture(autouse=True)
     def _clear_queue(self):
         """Clear the in-memory download queue before each test."""
-        from shelfmark_wrapper.sabnzbd import _download_queue
+        from shelfmark_news.sabnzbd import _download_queue
 
         _download_queue.clear()
-        with patch("shelfmark_wrapper.sabnzbd._execute_download"):
+        with patch("shelfmark_news.sabnzbd._execute_download"):
             yield
         _download_queue.clear()
 
     def test_search_grab_download_history(self, client):
         """Full Readarr lifecycle with mocked shelfmark search."""
         from collections import namedtuple
-        from shelfmark_wrapper.sabnzbd import (
+        from shelfmark_news.sabnzbd import (
             _download_queue,
             DownloadStatus,
         )
