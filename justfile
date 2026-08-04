@@ -13,8 +13,8 @@ lint:
     ruff check
 
 run:
-    @echo "Starting shelfmark-wrapper server..."
-    uv run shelfmark-wrapper
+    @echo "Starting shelfmark-news server..."
+    uv run shelfmark-news
 
 up:
     @echo "Starting container..."
@@ -40,7 +40,7 @@ watch:
     trap cleanup INT TERM
     last="" log_pid=""
     while true; do
-        new=$(docker inspect -f {{ "'{{.Id}}'" }} shelfmark-wrapper 2>/dev/null) || true
+        new=$(docker inspect -f {{ "'{{.Id}}'" }} shelfmark-news 2>/dev/null) || true
         if [ "$new" != "$last" ] && [ -n "$new" ]; then
             [ -z "$log_pid" ] || kill "$log_pid" 2>/dev/null
             docker logs -f --tail 0 "$new" 2>&1 &

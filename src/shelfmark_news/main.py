@@ -1,4 +1,4 @@
-"""Main application entry point for shelfmark-wrapper.
+"""Main application entry point for shelfmark-news.
 
 This creates a FastAPI application that provides Newznab and SABnzbd
 compatible APIs for book searching and downloading.
@@ -20,10 +20,10 @@ if str(_shelfmark_src) not in sys.path:
     sys.path.insert(0, str(_shelfmark_src))
 
 # Allow imports after the src editing
-from shelfmark_wrapper import __version__  # noqa: E402
-from shelfmark_wrapper.newznab import router as newznab_router  # noqa: E402
-from shelfmark_wrapper.sabnzbd import router as sabnzbd_router  # noqa: E402
-from shelfmark_wrapper.config import (  # noqa: E402
+from shelfmark_news import __version__  # noqa: E402
+from shelfmark_news.newznab import router as newznab_router  # noqa: E402
+from shelfmark_news.sabnzbd import router as sabnzbd_router  # noqa: E402
+from shelfmark_news.config import (  # noqa: E402
     SERVER_DEBUG,
     SERVER_HOST,
     SERVER_PORT,
@@ -88,7 +88,7 @@ async def lifespan(app: FastAPI):
 def create_app() -> FastAPI:
     """Create and configure the FastAPI application."""
     app = FastAPI(
-        title="Shelfmark Wrapper",
+        title="Shelfmark News",
         description="Newznab/SABnzbd API wrapper for book searching and downloading",
         version=__version__,
         lifespan=lifespan,
@@ -109,7 +109,7 @@ def create_app() -> FastAPI:
     async def root():
         """Root endpoint with API information."""
         return {
-            "name": "Shelfmark Wrapper",
+            "name": "Shelfmark News",
             "version": __version__,
             "description": "Newznab/SABnzbd API wrapper for book searching",
             "endpoints": {
@@ -134,7 +134,7 @@ def main():
     import argparse
     import uvicorn
 
-    parser = argparse.ArgumentParser(description="Shelfmark Wrapper server")
+    parser = argparse.ArgumentParser(description="Shelfmark News server")
     parser.add_argument(
         "--debug",
         action="store_true",
@@ -149,14 +149,14 @@ def main():
 
     logging.getLogger().setLevel(logging.DEBUG if debug else logging.INFO)
 
-    logger.info("Starting Shelfmark Wrapper v%s", __version__)
+    logger.info("Starting Shelfmark News v%s", __version__)
     logger.info("Server: %s:%d", SERVER_HOST, SERVER_PORT)
 
     if not SERVER_API_KEY:
         logger.warning("No API key configured - API is open!")
 
     uvicorn.run(
-        "shelfmark_wrapper.main:app",
+        "shelfmark_news.main:app",
         host=SERVER_HOST,
         port=SERVER_PORT,
         reload=debug,
