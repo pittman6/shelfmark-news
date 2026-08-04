@@ -1,0 +1,3 @@
+[submodule "shelfmark"]
+	path = shelfmark
+	url = git@github.com:calibrain/shelfmark.git

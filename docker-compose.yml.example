@@ -1,0 +1,28 @@
+services:
+  shelfmark-wrapper:
+    build: .
+    container_name: shelfmark-wrapper
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./downloads:/downloads
+    environment:
+      # Set API key for newznab / sabnzbd integration
+      SERVER_API_KEY: pick-your-own-server-key
+
+      # Configure download location (default: books)
+      INGEST_DIR: "/books"
+
+      # Configure mirrors 
+      LIBGEN_MIRROR_URLS: ""
+      ZLIB_MIRROR_URLS: ""
+      AA_MIRROR_URLS: ""
+      WELIB_MIRROR_URLS: ""
+
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
