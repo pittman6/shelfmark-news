@@ -1,0 +1,52 @@
+name: "General checks: Lints, Tests, Docs"
+
+on:
+  workflow_call:
+
+jobs:
+  # check python formatting
+  ruff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout
+        with:
+          submodules: recursive
+      - uses: astral-sh/ruff-action@v3
+        name: Ruff
+        with:
+          version: "0.12.1"
+
+  # check python typing
+  types:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout
+        with:
+          submodules: recursive
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Install the project
+        run: uv sync --dev
+      - name: Run pyrefly
+        run: uv run pyrefly check
+
+  # run the test suite
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout
+        with:
+          submodules: recursive
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Install the project
+        run: uv sync --dev
+      - name: Run tests
+        run: uv run pytest -v

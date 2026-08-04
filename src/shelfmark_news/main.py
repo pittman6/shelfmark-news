@@ -13,7 +13,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-# ponytaill: shelfmark submodule has [tool.uv] package=false, so inject its
+# shelfmark submodule has [tool.uv] package=false, so inject its
 # source directory onto sys.path so the shelfmark package is importable.
 _shelfmark_src = Path(__file__).parent.parent.parent / "shelfmark"
 if str(_shelfmark_src) not in sys.path:

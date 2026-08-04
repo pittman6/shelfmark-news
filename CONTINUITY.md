@@ -3,7 +3,9 @@
 ## Snapshot
 - **Goal:** Project rename shelfmark-wrapper → shelfmark-news. [2026-08-03]
 - **Now:** Full rename done. Package `shelfmark_wrapper` → `shelfmark_news` (dir `src/shelfmark_wrapper/` → `src/shelfmark_news/`), pyproject name/script/hatch packages, Dockerfile/compose service+container name, justfile, README/AGENTS, `uv.lock` regenerated, `.venv` reinstalled. 49/49 tests pass, ruff clean, `uv run shelfmark-news` works. Note: `src/shelfmark_news/api/` is EMPTY (AGENTS references api/newznab.py + sabnzbd.py here but real code lives at package root).
-- **Next:** Nothing pending.
+- **Next:** CI workflows under `.github/` now adapted to this repo (docker publishing to GHCR).
+  - Note: repo git remote = `pittman6/shelfmark-news` on ghanon host (not github.com). PRs/releases require `RELEASE_PLEASE_GITHUB_TOKEN` secret.
+  - Note: ruff-action default run has 28 pre-existing violations in tests/ (UP038, N802) — pre-existing, not CI-blocking by design but will show in checks.
 
 ## Invariants
 - `shelfmark/` submodule must not be edited.
@@ -18,6 +20,10 @@
 - **D005 ACTIVE (2026-06-29):** Shelfmark dep uses editable path (`{ path = "shelfmark/", editable = true }`) instead of workspace member. `shelfmark/shelfmark/` injected onto `sys.path` at top of `main.py` because the submodule lacks `[build-system]` so editable install produces an empty package. Root `requires-python` bumped to `>=3.14` to match shelfmark's requirement. [CODE]
 
 ## Done (recent)
+- **2026-08-03 [CODE]:**
+  - Fixed `release-please-config.json`: `extra-files` was `src/borg2mqtt/__init__.py` → `src/shelfmark_news/__init__.py`.
+  - `reusable_checks.yml`: checkout now `submodules: recursive` (needed for submodule); types job uses `pyrefly check` (was nonexistent `basedpyright`, and bare `pyrefly` just prints help/exit 0); added a `tests` job running `uv run pytest -v`.
+  - `on_main.yml`: replaced PyPI wheel + gh release upload with GHCR Docker image publish (`ghcr.io/<repo>:<tag>` + `:latest`), added `packages: write` permission.
 - **2026-08-03:** Full rename `shelfmark-wrapper`→`shelfmark-news` / `shelfmark_wrapper`→`shelfmark_news`: package dir, pyproject (name/script/packages), source imports+loggers+meta tag, tests, Dockerfile, compose (+example) service/container name, justfile, README (incl. clone URL paths), AGENTS. `uv.lock` regenerated, `.venv` reinstalled. 49/49 tests pass, ruff clean, console script `shelfmark-news` works. [TOOL]
 - **2026-08-03:** Pre-release audit: no secrets in tracked files (all values placeholder/env-var). Removed `allow_credentials=True` from CORS (main.py). Re-registered `shelfmark/` gitlink at `cdd156e` (upstream HEAD) after `git submodule update` was impossible (gitdir missing) — fresh clone replaces old checkout, 49/49 tests pass. [TOOL]
 - **2026-06-29:** Fixed shelfmark import — editable path dep + sys.path injection + requires-python bump. 19/19 tests pass, ruff clean. [CODE]
