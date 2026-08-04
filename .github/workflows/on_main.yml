@@ -1,0 +1,65 @@
+name: Main
+
+on:
+  push:
+    branches:
+      - main
+      
+permissions:
+  contents: write
+  pull-requests: write
+  packages: write
+
+jobs:
+  # Always run checks
+  checks:
+    name: Checks
+    uses: ./.github/workflows/reusable_checks.yml
+    secrets: inherit
+
+  # Release Please to create releases
+  release:
+    name: Release Please
+    runs-on: ubuntu-latest
+    outputs:
+      # fromJSON to convert string "true"/"false" to boolean - doesn't match what's in release-please docs
+      # https://github.com/googleapis/release-please-action/issues/912#issuecomment-2024459449
+      releases_created: ${{ steps.release.outputs.releases_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          config-file: .github/release-please-config.json
+          manifest-file: .github/.release-please-manifest.json
+          token: ${{ secrets.RELEASE_PLEASE_GITHUB_TOKEN }}
+
+  # Build and publish a Docker image if a release was created
+  publish:
+    name: Publish Docker image
+    needs: [release]
+    runs-on: ubuntu-latest
+    if: ${{ fromJSON(needs.release.outputs.releases_created) }}
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout
+        with:
+          submodules: recursive
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:${{ needs.release.outputs.tag_name }}
+            ghcr.io/${{ github.repository }}:latest

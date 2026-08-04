@@ -23,6 +23,9 @@ members = [".", "shelfmark/"]
 search-path = ["shelfmark"]
 project-excludes = ["shelfmark/**"]
 
+[tool.ruff]
+extend-exclude = ["shelfmark"]
+
 [project.scripts]
 shelfmark-news = "shelfmark_news.main:main"
 
