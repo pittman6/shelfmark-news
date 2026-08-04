@@ -8,7 +8,7 @@
   - Note: ruff-action default run has 28 pre-existing violations in tests/ (UP038, N802) — pre-existing, not CI-blocking by design but will show in checks.
 
 ## Invariants
-- `shelfmark/` submodule must not be edited.
+- `src/shelfmark/` submodule must not be edited.
 - API key is `SERVER_API_KEY` env var (read via `os.environ.get`, no config layer).
 - Empty `SERVER_API_KEY` = no auth required.
 
@@ -45,6 +45,7 @@
 - None.
 
 ## Receipts
+- `2026-08-03 [TOOL]` Moved submodule `shelfmark/` → `src/shelfmark/` (git mv + .gitmodules path). Updated pyproject (workspace members, pyrefly search-path/excludes, ruff extend-exclude), main.py sys.path injection, Dockerfile (PYTHONPATH + COPY paths), README/AGENTS paths. Regenerated uv.lock (stale member path). 49/49 tests pass, ruff clean, app imports. [CODE]
 - `2026-08-03 [TOOL]` Pre-release audit: no real secrets tracked. CORS + submodule gitlink fixed. 49/49 tests pass, ruff clean, `git add -A --dry-run` sweeps nothing from shelfmark/.
 - `2026-06-29 [TOOL]` 19/19 tests pass. Ruff: clean on src/. Server starts (import works, `/books` permission is config issue).
 - `2026-06-28 [TOOL]` 19/19 tests pass. Ruff: clean on src/, only pre-existing shelfmark/ issues.

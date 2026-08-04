@@ -17,14 +17,14 @@ dependencies = [
 shelfmark = { workspace = true }
 
 [tool.uv.workspace]
-members = [".", "shelfmark/"]
+members = [".", "src/shelfmark/"]
 
 [tool.pyrefly]
-search-path = ["shelfmark"]
-project-excludes = ["shelfmark/**"]
+search-path = ["src/shelfmark"]
+project-excludes = ["src/shelfmark/**"]
 
 [tool.ruff]
-extend-exclude = ["shelfmark"]
+extend-exclude = ["src/shelfmark"]
 
 [project.scripts]
 shelfmark-news = "shelfmark_news.main:main"

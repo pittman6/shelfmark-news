@@ -6,7 +6,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     DOCKERMODE=true \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PYTHONPATH=/app:/app/shelfmark \
+    PYTHONPATH=/app:/app/src/shelfmark \
     UV_LINK_MODE=copy \
     PATH=/app/.venv/bin:$PATH \
     DEBIAN_FRONTEND=noninteractive
@@ -28,7 +28,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 COPY pyproject.toml uv.lock README.md ./
-COPY shelfmark/pyproject.toml shelfmark/
+COPY src/shelfmark/pyproject.toml src/shelfmark/
 # stub package init so hatchling can discover the package for editable install
 RUN mkdir -p src/shelfmark_news && touch src/shelfmark_news/__init__.py
 
@@ -42,7 +42,6 @@ RUN rm -rf \
     /usr/local/lib/python*/site-packages/pip \
     /usr/local/lib/python*/site-packages/pip-*.dist-info
 
-COPY shelfmark/ /app/shelfmark/
 COPY src/ /app/src/
 
 RUN rm -f /usr/bin/uv /usr/bin/uvx
