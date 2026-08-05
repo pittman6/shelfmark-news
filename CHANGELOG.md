@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/pittman6/shelfmark-news/compare/v0.1.1...v0.1.2) (2026-08-05)
+
+
+### Bug Fixes
+
+* Add uv.lock to release-please ([#6](https://github.com/pittman6/shelfmark-news/issues/6)) ([b38dcee](https://github.com/pittman6/shelfmark-news/commit/b38dceef1e30741e43fdc674960d7f5a83ba1367))
+
 ## [0.1.1](https://github.com/pittman6/shelfmark-news/compare/v0.1.0...v0.1.1) (2026-08-04)
 
 
