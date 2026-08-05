@@ -4,7 +4,9 @@ A Newznab/SABnzbd API wrapper around [shelfmark](https://github.com/calibrain/sh
 
 **Why?**: Shelfmark already has a battle-tested workflow for downloading this, but has [closed](https://github.com/calibrain/shelfmark/issues/397) requests for adding this feature in. 
 
-DISCLOSURE: The base of this project was LLM-generated. I've done my best to review and maintain the code to ensure it doesn't become complete slop. I didn't/don't have the time to devote to writing this 100% from scratch!
+DISCLOSURE: The base of this project was LLM-generated. I've done my best to review and maintain the code to ensure it doesn't become complete slop (not too hard, it's really only a couple of files). I didn't/don't have the time to devote to writing this 100% from scratch! Use at your own risk!
+
+*This project is in no way affiliated with shelfmark!*
 
 ## Features
 
