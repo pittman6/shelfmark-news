@@ -6,6 +6,7 @@ for books. This implements the subset of the API needed for book search.
 Reference: https://newznab.readthedocs.io/en/latest/misc/api/
 """
 
+import asyncio
 import hashlib
 from datetime import datetime, timezone
 from typing import Optional
@@ -15,7 +16,6 @@ from fastapi import APIRouter, Query, Request
 from fastapi.responses import Response
 
 from shelfmark_news.config import SERVER_API_KEY
-
 
 router = APIRouter(tags=["newznab"])
 
@@ -170,9 +170,7 @@ async def _handle_search(
     if not query:
         return _create_empty_response(request, apikey)
 
-    return await _perform_search(
-        request, query, None, None, limit, offset, apikey
-    )
+    return await _perform_search(request, query, None, None, limit, offset, apikey)
 
 
 def _create_empty_response(request: Request, apikey: str = "") -> Response:
@@ -368,14 +366,14 @@ async def _perform_search(
     apikey: str = "",
 ) -> Response:
     """Perform the actual search using shelfmark."""
-    from shelfmark.release_sources.direct_download import (
-        search_books,
-        SearchUnavailableError,
-    )
     from shelfmark.core.models import SearchFilters
+    from shelfmark.release_sources.direct_download import (
+        SearchUnavailableError,
+        search_books,
+    )
 
     try:
-        results = search_books(query, SearchFilters())
+        results, _ = await asyncio.to_thread(search_books, query, SearchFilters())
 
         total = len(results)
         results = results[offset : offset + limit]

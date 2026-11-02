@@ -8,15 +8,15 @@ Reference: https://sabnzbd.org/wiki/advanced/api
 
 import logging
 import uuid
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Optional, Dict
-from dataclasses import dataclass, field
+from typing import Dict, Optional
 
-from fastapi import APIRouter, HTTPException, Query, BackgroundTasks, Request
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Query, Request
 from fastapi.responses import JSONResponse, Response
 
-from shelfmark_news.config import SERVER_API_KEY, INGEST_DIR, TMP_DIR
+from shelfmark_news.config import INGEST_DIR, SERVER_API_KEY, TMP_DIR
 
 logger = logging.getLogger("shelfmark_news.sabnzbd")
 
@@ -377,11 +377,11 @@ async def _execute_download(nzo_id: str, source_id: str) -> None:
         source_id,
     )
     try:
-        from shelfmark.release_sources.direct_download import (
-            get_book_info,
-            DirectDownloadHandler,
-        )
         from shelfmark.core.models import DownloadTask
+        from shelfmark.release_sources.direct_download import DirectDownloadHandler
+        from shelfmark.release_sources.direct_download.annas_archive import (
+            get_book_info,
+        )
 
         book_info = await asyncio.to_thread(
             get_book_info,
@@ -469,6 +469,7 @@ async def _execute_download(nzo_id: str, source_id: str) -> None:
             return
 
         from pathlib import Path
+
         from shelfmark.download.postprocess.router import post_process_download
 
         task.staged_path = result_path

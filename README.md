@@ -132,6 +132,9 @@ For the full list of shelfmark environment variables, see the [shelfmark environ
 
 ## Development
 
+Requires Python 3.14 or newer and [uv](https://docs.astral.sh/uv/). The Shelfmark
+submodule is pinned to [v1.6.0](https://github.com/calibrain/shelfmark/releases/tag/v1.6.0).
+
 ### Install
 
 1. Clone the repository with submodules:
@@ -142,21 +145,23 @@ For the full list of shelfmark environment variables, see the [shelfmark environ
 
 2. Install the package:
    ```bash
-   pip install -e .
+   uv sync
    ```
+
+   When upgrading an existing environment, run `uv sync --reinstall-package python-xlib`
+   once to repair the old overlapping Xlib installations.
 
 3. Set environment variables and run:
    ```bash
    export SERVER_API_KEY=your-api-key
    export INGEST_DIR=/path/to/downloads
-   shelfmark-news
+   uv run shelfmark-news
    ```
 
 ### Running Tests
 
 ```bash
-pip install -e ".[dev]"
-pytest
+uv run pytest -v
 ```
 
 ### Project Dependencies

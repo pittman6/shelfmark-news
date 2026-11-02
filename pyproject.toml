@@ -3,7 +3,7 @@ name = "shelfmark-news"
 version = "0.1.2"
 description = "A Newznab/SABnzbd API wrapper around shelfmark for book searching and downloading"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.14"
 license = { text = "MIT" }
 authors = [{ name = "pittman6" }]
 dependencies = [
@@ -12,6 +12,18 @@ dependencies = [
     "shelfmark[browser]",
     "python-multipart>=0.0.32",
 ]
+
+[tool.uv]
+# PyAutoGUI/MouseInfo pull in legacy python3-xlib, while Shelfmark's browser extra
+# requires python-xlib. Both install files into the same site-packages/Xlib/ path.
+# uv.lock pins both distributions, but does not define ownership of overlapping
+# files: even fresh venvs can load either implementation depending on install order.
+# The legacy version lacks Xlib.X.FamilyServerInterpreted, which SeleniumBase needs
+# to start browser-based challenge bypass. Keep only python-xlib, which also
+# provides the Xlib API used by PyAutoGUI/MouseInfo.
+# Remove this exclusion once upstream dependencies stop pulling in python3-xlib.
+# https://docs.astral.sh/uv/concepts/preview/#detect-module-conflicts
+exclude-dependencies = ["python3-xlib"]
 
 [tool.uv.sources]
 shelfmark = { workspace = true }

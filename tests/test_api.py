@@ -89,7 +89,7 @@ class TestNewznabAPI:
         )
 
         with patch(
-            "shelfmark.release_sources.direct_download.search_books", return_value=[fake]
+            "shelfmark.release_sources.direct_download.search_books", return_value=([fake], 1)
         ):
             response = client.get(
                 "/api?t=search&q=gatsby&apikey=test-api-key"
@@ -118,7 +118,7 @@ class TestNewznabAPI:
         )
 
         with patch(
-            "shelfmark.release_sources.direct_download.search_books", return_value=[fake]
+            "shelfmark.release_sources.direct_download.search_books", return_value=([fake], 1)
         ) as mock_search:
             client.get(
                 "/api?t=book&author=Frank+Herbert&title=Dune&apikey=test-api-key"
@@ -144,6 +144,73 @@ class TestNewznabAPI:
         assert response.status_code == 200
         assert b"900" in response.content  # Error code
         assert b"down" in response.content
+
+    @pytest.mark.parametrize("upstream_total", [None, 120, "500+"])
+    def test_search_paginates_available_records(self, client, upstream_total):
+        from xml.etree import ElementTree as ET
+
+        from shelfmark.release_sources import BrowseRecord
+
+        records = [
+            BrowseRecord(id=f"book{i}", title=f"Book {i}", source="direct_download")
+            for i in range(3)
+        ]
+        with patch(
+            "shelfmark.release_sources.direct_download.search_books",
+            return_value=(records, upstream_total),
+        ):
+            response = client.get(
+                "/api?t=search&q=books&limit=1&offset=1&apikey=test-api-key"
+            )
+
+        root = ET.fromstring(response.content)
+        header = root.find(".//{http://www.newznab.com/DTD/2010/feeds/attributes/}response")
+        assert header is not None
+        assert header.attrib == {"offset": "1", "total": "3"}
+        assert [item.findtext("title") for item in root.findall(".//item")] == ["Book 1"]
+
+    def test_search_with_no_matches(self, client):
+        with patch(
+            "shelfmark.release_sources.direct_download.search_books",
+            return_value=([], None),
+        ):
+            response = client.get("/api?t=search&q=missing&apikey=test-api-key")
+
+        assert b'<newznab:response offset="0" total="0"' in response.content
+        assert b"<item>" not in response.content
+
+    def test_search_uses_upstream_parser(self, client):
+        from bs4 import BeautifulSoup
+
+        html = """<table><tbody><tr>
+            <td><a href="/md5/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"><img src="cover.jpg"></a></td>
+            <td><span>Parsed Book</span></td><td><span>Parsed Author</span></td>
+            <td><span>Publisher</span></td><td><span>2026</span></td>
+            <td></td><td></td><td><span>English</span></td>
+            <td><span>fiction</span></td><td><span>epub</span></td>
+            <td><span>2 MB</span></td>
+        </tr></tbody></table>"""
+        table = BeautifulSoup(html, "html.parser").find("tbody")
+        with (
+            patch(
+                "shelfmark.release_sources.direct_download.annas_archive.network.AAMirrorSelector"
+            ),
+            patch(
+                "shelfmark.release_sources.direct_download.annas_archive.network.get_aa_base_url",
+                return_value="https://example.invalid",
+            ),
+            patch(
+                "shelfmark.release_sources.direct_download.annas_archive._fetch_search_table",
+                return_value=(html, table),
+            ),
+            patch(
+                "shelfmark.release_sources.direct_download.annas_archive._enrich_search_results_with_downloads"
+            ),
+        ):
+            response = client.get("/api?t=search&q=parsed&apikey=test-api-key")
+
+        assert b"Parsed Book - Parsed Author [epub]" in response.content
+        assert b'<newznab:response offset="0" total="1"' in response.content
 
 
 class TestSABnzbdAPI:
@@ -793,7 +860,7 @@ class TestReadarrWorkflow:
 
         # Step 1: Search
         with patch(
-            "shelfmark.release_sources.direct_download.search_books", return_value=[fake]
+            "shelfmark.release_sources.direct_download.search_books", return_value=([fake], 1)
         ):
             search_resp = client.get(
                 "/api?t=search&q=neuromancer&apikey=test-api-key"
@@ -851,3 +918,118 @@ class TestReadarrWorkflow:
             "/sabnzbd/api?mode=queue&apikey=test-api-key"
         )
         assert len(queue_resp2.json()["queue"]["slots"]) == 0
+
+
+class TestShelfmarkDownload:
+    """Exercise the real handler and post-processing, mocking only network access."""
+
+    @pytest.fixture
+    def download_item(self, client):
+        from shelfmark_news.sabnzbd import DownloadItem, _download_queue
+
+        item = DownloadItem(
+            nzo_id="integration-download",
+            source_id="a" * 32,
+            source="direct_download",
+            title="Pending",
+        )
+        _download_queue[item.nzo_id] = item
+        yield item
+        _download_queue.pop(item.nzo_id, None)
+
+    async def test_download_moves_file_to_ingest(self, download_item, tmp_path, monkeypatch):
+        from pathlib import Path
+
+        from shelfmark.release_sources import BrowseRecord
+
+        from shelfmark_news.sabnzbd import DownloadStatus, _execute_download
+
+        book = BrowseRecord(
+            id=download_item.source_id,
+            title="Integration Book",
+            source="direct_download",
+            author="Test Author",
+            format="epub",
+            size="1 MB",
+        )
+        ingest_dir = tmp_path / "ingest"
+        monkeypatch.setattr(
+            "shelfmark.release_sources.direct_download.handler.TMP_DIR", tmp_path
+        )
+        monkeypatch.setattr(
+            "shelfmark.download.postprocess.pipeline.get_final_destination",
+            lambda task: ingest_dir,
+        )
+
+        def fake_download(book_info, book_path, progress, cancel_flag, status):
+            book_path.write_bytes(b"test book content")
+            status("downloading", None)
+            progress(100.0)
+            return "https://example.invalid/book.epub"
+
+        with (
+            patch(
+                "shelfmark.release_sources.direct_download.annas_archive.get_book_info",
+                return_value=book,
+            ) as metadata,
+            patch(
+                "shelfmark.release_sources.direct_download.handler._download_book",
+                side_effect=fake_download,
+            ),
+        ):
+            await _execute_download(download_item.nzo_id, download_item.source_id)
+
+        metadata.assert_called_once_with(download_item.source_id, fetch_download_count=False)
+        assert download_item.status == DownloadStatus.COMPLETED
+        assert download_item.download_path is not None
+        final_path = Path(download_item.download_path)
+        assert final_path.is_relative_to(ingest_dir)
+        assert final_path.read_bytes() == b"test book content"
+        assert not list(tmp_path.glob("*.epub"))
+        assert download_item.title == book.title
+        assert download_item.size == 1024 * 1024
+        assert download_item.progress == 100.0
+
+    @pytest.mark.parametrize("failure", ["metadata", "download", "postprocess"])
+    async def test_download_failures_reach_history(self, download_item, client, failure):
+        from shelfmark.release_sources import BrowseRecord
+
+        from shelfmark_news.sabnzbd import DownloadStatus, _execute_download
+
+        with (
+            patch(
+                "shelfmark.release_sources.direct_download.annas_archive.get_book_info",
+                return_value=BrowseRecord(
+                    id=download_item.source_id, title="Book", source="direct_download"
+                ),
+                side_effect=RuntimeError("Metadata unavailable") if failure == "metadata" else None,
+            ),
+            patch(
+                "shelfmark.release_sources.direct_download.DirectDownloadHandler.download",
+                return_value=None if failure == "download" else "/unused/book.epub",
+            ),
+            patch(
+                "shelfmark.download.postprocess.router.post_process_download", return_value=None
+            ) as postprocess,
+        ):
+            await _execute_download(download_item.nzo_id, download_item.source_id)
+
+        assert download_item.status == DownloadStatus.FAILED
+        assert download_item.error_message == {
+            "metadata": "Metadata unavailable",
+            "download": "Download returned no path",
+            "postprocess": "Post-processing failed",
+        }[failure]
+        assert download_item.download_path is None
+        assert postprocess.call_count == (1 if failure == "postprocess" else 0)
+        history = client.get("/sabnzbd/api?mode=history&apikey=test-api-key").json()
+        assert any(
+            slot["nzo_id"] == download_item.nzo_id and slot["status"] == "Failed"
+            for slot in history["history"]["slots"]
+        )
+
+
+def test_xlib_supports_browser_bypass():
+    import Xlib.X
+
+    assert hasattr(Xlib.X, "FamilyServerInterpreted")
