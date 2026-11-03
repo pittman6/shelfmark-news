@@ -133,7 +133,7 @@ For the full list of shelfmark environment variables, see the [shelfmark environ
 ## Development
 
 Requires Python 3.14 or newer and [uv](https://docs.astral.sh/uv/). The Shelfmark
-submodule is pinned to [v1.6.0](https://github.com/calibrain/shelfmark/releases/tag/v1.6.0).
+submodule is pinned to [v1.6.1](https://github.com/calibrain/shelfmark/releases/tag/v1.6.1).
 
 ### Install
 

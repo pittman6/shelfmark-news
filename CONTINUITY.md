@@ -1,14 +1,12 @@
 # CONTINUITY.md
 
 ## Snapshot
-- 2026-11-01 [USER] Goal: upgrade Shelfmark to newest stable release and fix wrapper compatibility.
-- 2026-11-01 [TOOL] Clean initial checkout; original submodule v1.3.12 (`89104ae`). GitHub releases/latest identifies v1.6.0, published 2026-10-31; checked out tag (`9bd6c51`). No Shelfmark source edits permitted.
-- 2026-11-01 [CODE] Now: upgrade complete; fixed search tuple unpacking (offloaded to a thread), moved metadata import, Python 3.14 metadata/Docker, and Xlib dependency collision. Added 10 regression cases.
-- 2026-11-01 [TOOL] Validation: 59 tests pass; pyrefly has zero errors; locked sync, Docker build, API startup and Xlib checks pass. Ruff has 70 pre-existing findings and no new findings. Live external downloads/challenge solving not tested.
-- 2026-11-01 [CODE] Next: user review; no commit or deployment performed.
-- 2026-11-01 [CODE] Open questions: none. Existing search is Anna's Archive-based; adding new provider support is out of scope.
-- 2026-11-01 [USER] Follow-up: test completely fresh venvs without Xlib exclusion before retaining workaround.
-- 2026-11-01 [TOOL] Follow-up complete: three fresh venvs without exclusion gave one failed and two passed Xlib probes with identical locked versions; three fresh venvs with exclusion all passed. Working venv/config untouched; keep D007.
+- 2026-11-02 [USER] Goal: update Shelfmark to the new stable release, keeping the update small.
+- 2026-11-02 [TOOL] Clean initial checkout at parent `b41d7d6`, submodule v1.6.0. GitHub releases/latest identifies v1.6.1, published 2026-11-02; checked out tag `ed0777a2e0614dcb3104b123bc13ebdf41caf463`.
+- 2026-11-02 [CODE] Now: updated submodule pin and README. Upstream dependencies and wrapper-facing APIs unchanged; no wrapper code or lockfile changes needed. Xlib exclusion retained.
+- 2026-11-02 [TOOL] Validation complete: locked sync, 59 tests, type checks, startup/coordinator/API smoke checks and bypass imports pass. Ruff has 65 pre-existing findings, unchanged from this task's baseline; final diff check passes.
+- 2026-11-02 [CODE] Next: user review. Docker rebuild and live external downloads not performed for this patch update.
+- 2026-11-02 [CODE] Constraints: no submodule source edits, unrelated changes, commits or deployment. Open questions: none.
 
 ## Invariants
 - `src/shelfmark/` submodule must not be edited.
@@ -25,6 +23,7 @@
 - 2026-11-01 [CODE] **D007 ACTIVE:** Exclude obsolete `python3-xlib` via root uv settings; existing `python-xlib` supplies the shared Xlib namespace. Existing environments need one `uv sync --reinstall-package python-xlib` after removing the collision (done here; documented in README).
 
 ## Done (recent)
+- 2026-11-02 [CODE] Upgraded Shelfmark v1.6.0 → v1.6.1 (`ed0777a`); updated README pin. Upstream release mostly extracts Flask routes and spools large debrid downloads; wrapper compatibility tests pass unchanged.
 - 2026-11-01 [CODE] Upgraded Shelfmark v1.3.12 → v1.6.0 (`9bd6c51388f6efc1ce258f6b22022a94bcc7f230`), regenerated lockfile, fixed search/download imports and Python requirements; no submodule source edits.
 - 2026-11-01 [TOOL] New regression tests reproduced search, download-import and browser dependency failures before fixes; final suite passes 59/59, including real parser and handler/post-processing with mocked network.
 - **2026-08-03 [CODE]:**
@@ -41,16 +40,17 @@
 - 2026-11-01 [TOOL] File ownership verified using installed `Xlib/X.py` SHA-256 versus both distributions' RECORD hashes: failing venv matches `python3-xlib==0.15`; both passing venvs match `python-xlib==0.33`. Same installed-package list does not imply the same file contents when distributions overlap.
 
 ## Working set
-- 2026-11-01 [CODE] `src/shelfmark` — released gitlink only
-- 2026-11-01 [CODE] `pyproject.toml`, `uv.lock`, `Dockerfile`
-- 2026-11-01 [CODE] `src/shelfmark_news/newznab.py`, `src/shelfmark_news/sabnzbd.py`
-- 2026-11-01 [CODE] `tests/test_api.py`, new integration regression tests
-- 2026-11-01 [CODE] `README.md`, `CONTINUITY.md`
+- 2026-11-02 [CODE] `src/shelfmark` — released gitlink only
+- 2026-11-02 [CODE] `README.md`, `CONTINUITY.md`
+- 2026-11-02 [CODE] Validation only: `pyproject.toml`, `uv.lock`, `src/shelfmark_news/`, `tests/test_api.py`
 
 ## Open questions
 - 2026-11-01 [CODE] None.
 
 ## Receipts
+- 2026-11-02 [TOOL] Startup smoke check with isolated config: coordinator alive, health/Newznab/SABnzbd endpoints pass, bypass module imports. Ruff baseline comparison: 65 existing findings, none added; `git diff --check` passes; submodule source remains clean. Only README, ledger and submodule pin changed.
+- 2026-11-02 [TOOL] GitHub releases/latest: `https://github.com/calibrain/shelfmark/releases/tag/v1.6.1`; stable, published 2026-11-02T04:21:44Z. Upstream `pyproject.toml` unchanged from v1.6.0.
+- 2026-11-02 [TOOL] `uv sync --locked`: passes without lockfile changes; `uv run pytest -v`: 59 passed, existing Starlette/httpx warning; `uv run pyrefly check`: zero errors.
 - 2026-11-01 [CODE] User-requested expanded comment in `pyproject.toml` documents the Xlib file collision, lockfile limitation, SeleniumBase failure, compatible replacement and removal condition; dependency settings unchanged.
 - 2026-11-01 [TOOL] uv docs `https://docs.astral.sh/uv/concepts/preview/#detect-module-conflicts` explicitly state conflicting modules can make imports depend on install order despite different distribution names; optional preview feature warns about this. No project settings changed during this explanation.
 - 2026-11-01 [TOOL] Six isolated fresh venvs tested in `/tmp/opencode/shelfmark-xlib-clean-xx2imn9d`; `results.json` records without-exclusion probes (false/true/true), `results-fixed.json` records with-exclusion probes (true/true/true). Only lock graph difference was `python3-xlib`; original workspace and working venv unchanged.
